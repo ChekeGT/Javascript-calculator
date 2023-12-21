@@ -7,7 +7,11 @@ export default function createCalculator(){
     const numberRegex = /((\d+\.\d+|\d+)|\((\+|-)(\d+\.\d+|\d+)\))/g
 
     function getNumbers(expression){
-       return expression.match(numberRegex).map((number) => +number.replace(/\(|\)/g, ''))
+        let matches = expression.match(numberRegex)
+        if (matches){
+            matches = matches.map((number) => +number.replace(/\(|\)/g, ''))
+        }
+       return matches
     }
     function getOperator(expression){
         let firstMatch = expression.match(numberRegex)[0];
@@ -66,14 +70,22 @@ export default function createCalculator(){
     function formatInput(input){
         if (input.startsWith('-')){
             let negativeNumberRegex = new RegExp(`-${numberRegex.source}`, 'g')
-            let firstNegativeNumber = input.match(negativeNumberRegex)[0] 
-            input = input.replace(firstNegativeNumber, `(${firstNegativeNumber})`)
+            if (negativeNumberRegex.test(input)){
+                let firstNegativeNumber = input.match(negativeNumberRegex)[0] 
+                input = input.replace(firstNegativeNumber, `(${firstNegativeNumber})`)
+            }
         }
         return input
     }
 
     function doCalculation(input){
+        if (!input){
+            return
+        }
         let numbers = getNumbers(input)
+        if (!numbers){
+            return input.replace(/\(|\)|\*|\+/g, '')
+        }
         if (numbers.length == 1){
             return input.replace(/\(|\)|\*|\+/g, '')
         }
@@ -83,5 +95,4 @@ export default function createCalculator(){
 
         return doCalculation(input)
     }
-
 }
