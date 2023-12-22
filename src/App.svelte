@@ -10,11 +10,12 @@
     setContext('AC', calculator.AC)
     setContext('getResult', calculator.getResult)
     class KeyObj{
-        constructor(key, name, className, id){
-            this.key = key
+        constructor(character, name, className, id, key){
+            this.character = character
             this.name = name
             this.className = className
             this.id = id
+            this.key = key
         }
     }
 
@@ -37,7 +38,7 @@
         new KeyObj('*', 'x', 'operator', 'multiply'),
         new KeyObj('-', '-', 'operator', 'subtract'),
         new KeyObj('+', '+', 'operator', 'add'),
-        new KeyObj('=', '=', 'equals', 'equals')
+        new KeyObj('=', '=', 'equals', 'equals', 'Enter')
     ]
     
     let input = $derived(renderCalcValues(calculator.input))
