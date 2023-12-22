@@ -1,6 +1,12 @@
+function replaceCharacter(index, txt, newCharacter){
+    let characters = txt.split('')
+    characters[index] = newCharacter
+    return characters.join('')
+}
+
 export default function createCalculator(){
     
-    let input = $state('')
+    let input = $state('0')
 
     let result = $derived(doCalculation(formatInput(input)))
 
@@ -94,5 +100,50 @@ export default function createCalculator(){
         input = input.replace(prioritaryExpression, evaluateExpression(prioritaryExpression))
 
         return doCalculation(input)
+    }
+
+    function appendCharacter(c){
+        const operatorsRegex = /(\/|\+|-|\*)/
+        if (input.startsWith("0") && input.length == 1){
+            console.log(operatorsRegex.test(c))
+            if (c == "." || operatorsRegex.test(c)){
+                input += c
+                return
+            }
+            input = c
+            return
+        }
+        if (c == "."){
+            if (!operatorsRegex.test(input[input.length - 1])){
+                let regex = /([^\*\+\/-])+/g
+                let matches = input.match(regex)
+                if (matches){
+                    const currentNumber = matches[matches.length - 1]
+                    console.log(currentNumber)
+                    const alreadyContainsFloatingPoint = () => /\./.test(currentNumber)
+
+                    if (!alreadyContainsFloatingPoint()){
+                        input += c
+                    }
+                }
+            }
+            return
+        }
+        if (operatorsRegex.test(c) && operatorsRegex.test(input[input.length - 1])){
+            input = replaceCharacter(input.length - 1, input, c)
+            return
+        }
+        input += c
+    }
+
+    function AC(){
+        input = "0"
+    }
+
+    return {
+        get input(){return input},
+        get result(){return result},
+        appendCharacter,
+        AC
     }
 }
