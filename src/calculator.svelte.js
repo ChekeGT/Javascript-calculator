@@ -10,6 +10,8 @@ export default function createCalculator(){
 
     let display = $state('')
     
+    let inputContainsResult = $state(false)
+    
     const operatorsRegex = /(\/|\+|-|\*)/
     
     $effect(() => {
@@ -90,9 +92,6 @@ export default function createCalculator(){
     }
 
     function formatInput(input){
-        if (/=/.test(input)){
-            return input.match(/=.+/g)[0].replace(/=/, '')
-        }
         if (input.startsWith('-')){
             let negativeNumberRegex = new RegExp(`-${numberRegex.source}`, 'g')
             if (negativeNumberRegex.test(input)){
@@ -122,8 +121,19 @@ export default function createCalculator(){
     }
 
     function appendCharacter(c){
+        if (inputContainsResult){
+            if (operatorsRegex.test(c)){
+                input = input.match(/=.+/g)[0].replace(/=/, '') + c
+                inputContainsResult = false
+                return
+            }else{
+                AC()
+                inputContainsResult = false
+                appendCharacter(c)
+                return
+            }            
+        }
         if (input.startsWith("0") && input.length == 1){
-            console.log(operatorsRegex.test(c))
             if (c == "." || operatorsRegex.test(c)){
                 input += c
                 return
@@ -158,10 +168,21 @@ export default function createCalculator(){
         input = "0"
     }
 
+    function getResult(){
+        if (inputContainsResult){
+            return
+        }
+        const result = doCalculation(formatInput(input))
+        input = `${input}=${result}`
+        display = result
+        inputContainsResult = true
+    }
+
     return {
         get input(){return input},
         get display(){return display},
         appendCharacter,
-        AC
+        AC,
+        getResult
     }
 }
