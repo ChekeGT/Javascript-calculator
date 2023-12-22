@@ -4,6 +4,10 @@ function replaceCharacter(index, txt, newCharacter){
     return characters.join('')
 }
 
+function isInteger(number) {
+    return number % 1 === 0
+}
+
 export default function createCalculator(){
     
     let input = $state('0')
@@ -23,17 +27,18 @@ export default function createCalculator(){
         if (operatorsRegex.test(lastCharacterAdded)){
             display = lastCharacterAdded
         }else{
-            let numbers = getNumbers(input)
-            display = numbers[numbers.length - 1]
+            let numbers = getNumbers(input, true)
+            const number = numbers[numbers.length - 1]
+            display = number
         }
     }
 
     const numberRegex = /((\d+\.\d+|\d+)|\((\+|-)(\d+\.\d+|\d+)\))/g
 
-    function getNumbers(expression){
+    function getNumbers(expression, string = false){
         let matches = expression.match(numberRegex)
         if (matches){
-            matches = matches.map((number) => +number.replace(/\(|\)/g, ''))
+            matches = matches.map((number) => string ? number : +number.replace(/\(|\)/g, ''))
         }
        return matches
     }
@@ -111,7 +116,8 @@ export default function createCalculator(){
             return input.replace(/\(|\)|\*|\+/g, '')
         }
         if (numbers.length == 1){
-            return input.replace(/\(|\)|\*|\+/g, '')
+            let number = +input.replace(/\(|\)|\*|\+/g, '')
+            return number
         }
         const prioritaryExpression = getPrioritaryExpression(input)
 
