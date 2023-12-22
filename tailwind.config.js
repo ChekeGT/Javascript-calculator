@@ -5,7 +5,14 @@ export default {
     "./src/**/*.{js,svelte}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      gridTemplateColumns: {
+        'calculator': '3fr 1fr'
+      }
+    },
+    fontFamily:{
+      'digital': 'Orbitron, sans-serif;'
+    }
   },
   plugins: [],
 }
