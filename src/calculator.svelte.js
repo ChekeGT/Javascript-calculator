@@ -23,13 +23,17 @@ export default function createCalculator(){
     })
 
     function renderDisplay(input){
+        if (inputContainsResult){
+            return
+        }
         const lastCharacterAdded = input[input.length - 1]
+        let operatorsRegex = /\/|\+|\*/
         if (operatorsRegex.test(lastCharacterAdded)){
             display = lastCharacterAdded
         }else{
             let numbers = getNumbers(input, true)
             const number = numbers[numbers.length - 1]
-            display = number
+            display = `${number}`
         }
     }
 
@@ -80,16 +84,18 @@ export default function createCalculator(){
         return result
     }
 
-    function getPrioritaryExpression(input){
+    function getPrioritaryExpression(txt){
         const multiplyAndDivideRegex = /(\*|\/)/g
         const sumAndSubstractRegex = /(\+|-)/g
         const multiplyAndDivideExpressionRegex = new RegExp(`${numberRegex.source}${multiplyAndDivideRegex.source}${numberRegex.source}`, 'g')
         const sumAndSubstractExpressionRegex = new RegExp(`${numberRegex.source}${sumAndSubstractRegex.source}${numberRegex.source}`, 'g')
 
-        const multiplyAndDivideExpressions = input.match(multiplyAndDivideExpressionRegex)
-        const sumAndSubstractExpressions = input.match(sumAndSubstractExpressionRegex)
+        const multiplyAndDivideExpressions = txt.match(multiplyAndDivideExpressionRegex)
+        const sumAndSubstractExpressions = txt.match(sumAndSubstractExpressionRegex)
 
-        
+        if (multiplyAndDivideExpressions == null && sumAndSubstractExpressions == null){
+            console.log(txt, input)
+        }
         if (multiplyAndDivideExpressions == null){
             return sumAndSubstractExpressions[0]
         }
@@ -125,7 +131,28 @@ export default function createCalculator(){
 
         return doCalculation(input)
     }
-
+    function isThereAnOpenParenthesis(input){
+        let matches = []
+        let match; 
+        const regex = /\({1}/g
+        while ((match = regex.exec(input)) != null){
+            matches.push(match)
+        }
+        if(matches.length > 0){
+            const lastMatch = matches[matches.length - 1]
+            return !/\)/.test(input.slice(lastMatch.index,))
+        }
+        return false
+    }
+    function closeOpenParenthesis(input, char){
+        return input + `)${char}`
+    }
+    
+    function removePurposelessParenthesis(input){
+        const inputArr = input.split('')
+        inputArr.splice(input.length - 2, 2)
+        return inputArr.join('')
+    }
     function appendCharacter(c){
         if (inputContainsResult){
             if (operatorsRegex.test(c)){
@@ -138,6 +165,16 @@ export default function createCalculator(){
                 appendCharacter(c)
                 return
             }            
+        }
+        if (input.length > 2 && operatorsRegex.test(c)){
+            const isThereANoPurposeOpenParenthesis = `${input[input.length - 2]}${input[input.length - 1]}` == "(-"
+            if (isThereANoPurposeOpenParenthesis){
+                input = removePurposelessParenthesis(input)
+            }
+        }
+        if (!(/\d+|\./.test(c)) && isThereAnOpenParenthesis(input)){
+            input = closeOpenParenthesis(input, c)
+            return
         }
         if (input.startsWith("0") && input.length == 1){
             if (c == "." || operatorsRegex.test(c)){
@@ -153,7 +190,6 @@ export default function createCalculator(){
                 let matches = input.match(regex)
                 if (matches){
                     const currentNumber = matches[matches.length - 1]
-                    console.log(currentNumber)
                     const alreadyContainsFloatingPoint = () => /\./.test(currentNumber)
 
                     if (!alreadyContainsFloatingPoint()){
@@ -161,6 +197,18 @@ export default function createCalculator(){
                     }
                 }
             }
+            return
+        }
+        if (c == "-"){
+            const lastCharacterAdded = input[input.length - 1]
+            if (/\.|-/.test(lastCharacterAdded)){
+                return
+            }
+            if (/\d+/.test(lastCharacterAdded)){
+                input += "-"
+                return
+            }
+            input += "(-"
             return
         }
         if (operatorsRegex.test(c) && operatorsRegex.test(input[input.length - 1])){
@@ -171,6 +219,7 @@ export default function createCalculator(){
     }
 
     function AC(){
+        inputContainsResult = false
         input = "0"
     }
 
@@ -178,10 +227,13 @@ export default function createCalculator(){
         if (inputContainsResult){
             return
         }
+        if (isThereAnOpenParenthesis(input)){
+            input += ")"
+        }
         const result = doCalculation(formatInput(input))
-        input = `${input}=${result}`
-        display = result
         inputContainsResult = true
+        input = `${input}=${result}`
+        display = `${result}`
     }
 
     return {
