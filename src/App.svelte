@@ -1,6 +1,14 @@
 <script>
+    import { setContext } from "svelte";
+    import createCalculator from "./calculator.svelte";
     import Key from "./lib/Key.svelte";
+    
+    
+    let calculator = createCalculator()
 
+    setContext('appendKey', calculator.appendCharacter)
+    setContext('AC', calculator.AC)
+    setContext('getResult', calculator.getResult)
     class KeyObj{
         constructor(key, name, className, id){
             this.key = key
@@ -31,13 +39,21 @@
         new KeyObj('+', '+', 'operator', 'add'),
         new KeyObj('=', '=', 'equals', 'equals')
     ]
+    
+    let input = $derived(renderCalcValues(calculator.input))
+    let display =$derived(renderCalcValues(calculator.display))
+
+    function renderCalcValues(value){
+        return value.replace(/\(|\)/g, '')
+    }
+
 </script>
 
 <main class="w-[100vw] h-[100vh] bg-[#c2c2d6] flex justify-center items-center flex-col">
     <div class="flex w-[334px] h-[394px] bg-black flex-col p-[4px]">
         <div class="bg-black min-h-[55px] w-[320px]">
-            <div class="h-[20px] text-orange-400 font-digital flex justify-end text-xs">8/</div>
-            <div id="display" class="h-[35px text-white font-digital flex justify-end text-sm">45645644+2</div>
+            <div class="h-[20px] text-orange-400 font-digital flex justify-end text-xs">{input}</div>
+            <div id="display" class="h-[35px text-white font-digital flex justify-end text-sm">{display}</div>
         </div>
         <div class="flex">
             <div class="flex flex-wrap items-end">
