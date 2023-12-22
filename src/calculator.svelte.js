@@ -8,7 +8,23 @@ export default function createCalculator(){
     
     let input = $state('0')
 
-    let result = $derived(doCalculation(formatInput(input)))
+    let display = $state('')
+    
+    const operatorsRegex = /(\/|\+|-|\*)/
+    
+    $effect(() => {
+        renderDisplay(input)
+    })
+
+    function renderDisplay(input){
+        const lastCharacterAdded = input[input.length - 1]
+        if (operatorsRegex.test(lastCharacterAdded)){
+            display = lastCharacterAdded
+        }else{
+            let numbers = getNumbers(input)
+            display = numbers[numbers.length - 1]
+        }
+    }
 
     const numberRegex = /((\d+\.\d+|\d+)|\((\+|-)(\d+\.\d+|\d+)\))/g
 
@@ -74,6 +90,9 @@ export default function createCalculator(){
     }
 
     function formatInput(input){
+        if (/=/.test(input)){
+            return input.match(/=.+/g)[0].replace(/=/, '')
+        }
         if (input.startsWith('-')){
             let negativeNumberRegex = new RegExp(`-${numberRegex.source}`, 'g')
             if (negativeNumberRegex.test(input)){
@@ -103,7 +122,6 @@ export default function createCalculator(){
     }
 
     function appendCharacter(c){
-        const operatorsRegex = /(\/|\+|-|\*)/
         if (input.startsWith("0") && input.length == 1){
             console.log(operatorsRegex.test(c))
             if (c == "." || operatorsRegex.test(c)){
@@ -142,7 +160,7 @@ export default function createCalculator(){
 
     return {
         get input(){return input},
-        get result(){return result},
+        get display(){return display},
         appendCharacter,
         AC
     }
